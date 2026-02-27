@@ -92,6 +92,14 @@ async def send_hw_file(update,context):
     os.makedirs("homework_submit", exist_ok=True)
     file = await context.bot.get_file(file_id)
     await file.download_to_drive(f"homework_submit/{file_name}")
+    await update.message.reply_text('فایل شما با موفقیت ارسال شد.')
+
+async def wrong_file(update, context):
+    await update.message.reply_text(
+        """
+فرمت فایل مورد نظز اشتباه است. لطفا تکالیف را با فایل zip ارسال کنید.
+"""
+    )
 
 
 # ========================== Non-Command Message Handler ===============================
@@ -126,7 +134,10 @@ app.add_handler(CommandHandler("menu", menu))
 app.add_handler(CallbackQueryHandler(button_handler))
 
 # Saving Student's files
-app.add_handler(MessageHandler(filters.Document.MimeType("application/zip"), send_hw_file))
+app.add_handler(MessageHandler(filters.Document.FileExtension("zip") | filters.Document.FileExtension("rar"), send_hw_file)
+)
+
+app.add_handler(MessageHandler(filters.Document.ALL, wrong_file))
 
 # Answer user's non command texts
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
